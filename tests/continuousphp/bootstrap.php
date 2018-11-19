@@ -2,7 +2,17 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\DriverManager;
+
 (static function () : void {
+    DriverManager::getConnection([
+        'driver' => 'oci8',
+        'host' => 'oracle-xe-11',
+        'user' => 'ORACLE',
+        'password' => 'ORACLE',
+        'dbname' => 'XE',
+    ])->query('ALTER USER ORACLE IDENTIFIED BY ORACLE');
+
     $pos = array_search('--coverage-clover', $_SERVER['argv'], true);
 
     if ($pos === false) {
