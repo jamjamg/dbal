@@ -3,6 +3,7 @@
 namespace Doctrine\Tests\DBAL\Functional;
 
 use Doctrine\DBAL\Driver\OCI8\Driver as OCI8Driver;
+use Doctrine\DBAL\Driver\PDOOracle\Driver as PDOOracleDriver;
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver as PDOSQLSrvDriver;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
@@ -23,8 +24,17 @@ class BlobTest extends DbalFunctionalTestCase
     {
         parent::setUp();
 
-        if ($this->connection->getDriver() instanceof PDOSQLSrvDriver) {
+        $driver = $this->connection->getDriver();
+
+        if ($driver instanceof PDOSQLSrvDriver) {
             $this->markTestSkipped('This test does not work on pdo_sqlsrv driver due to a bug. See: http://social.msdn.microsoft.com/Forums/sqlserver/en-US/5a755bdd-41e9-45cb-9166-c9da4475bb94/how-to-set-null-for-varbinarymax-using-bindvalue-using-pdosqlsrv?forum=sqldriverforphp');
+        }
+
+        if ($driver instanceof PDOOracleDriver) {
+            // inserting BLOBs with the PDO Oracle driver requires a different SQL syntax
+            // which is currently not supported
+            // see http://php.net/manual/en/pdo.lobs.php#example-1035
+            $this->markTestSkipped('This test does not work on pdo_oci');
         }
 
         /** @var AbstractSchemaManager $sm */

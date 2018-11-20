@@ -2,6 +2,7 @@
 
 namespace Doctrine\Tests\DBAL\Functional;
 
+use Doctrine\DBAL\Driver\PDOOracle\Driver as PDOOracleDriver;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
@@ -79,6 +80,13 @@ class StatementTest extends DbalFunctionalTestCase
 
     public function testFetchLongBlob()
     {
+        if ($this->connection->getDriver() instanceof PDOOracleDriver) {
+            // inserting BLOBs with the PDO Oracle driver requires a different SQL syntax
+            // which is currently not supported
+            // see http://php.net/manual/en/pdo.lobs.php#example-1035
+            $this->markTestSkipped('This test does not work on pdo_oci');
+        }
+
         // make sure memory limit is large enough to not cause false positives,
         // but is still not enough to store a LONGBLOB of the max possible size
         $this->iniSet('memory_limit', '4G');

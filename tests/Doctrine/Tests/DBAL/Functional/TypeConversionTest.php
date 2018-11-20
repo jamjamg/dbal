@@ -3,6 +3,7 @@
 namespace Doctrine\Tests\DBAL\Functional;
 
 use DateTime;
+use Doctrine\DBAL\Driver\PDOOracle\Driver as PDOOracleDriver;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
@@ -81,6 +82,13 @@ class TypeConversionTest extends DbalFunctionalTestCase
      */
     public function testIdempotentDataConversion($type, $originalValue, $expectedPhpType)
     {
+        if ($type === 'text' && $this->connection->getDriver() instanceof PDOOracleDriver) {
+            // inserting LOBs with the PDO Oracle driver requires a different SQL syntax
+            // which is currently not supported
+            // see http://php.net/manual/en/pdo.lobs.php#example-1035
+            $this->markTestSkipped('This test does not work on pdo_oci');
+        }
+
         $columnName     = 'test_' . $type;
         $typeInstance   = Type::getType($type);
         $insertionValue = $typeInstance->convertToDatabaseValue($originalValue, $this->connection->getDatabasePlatform());
